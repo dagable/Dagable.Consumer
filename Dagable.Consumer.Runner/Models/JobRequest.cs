@@ -1,4 +1,4 @@
-﻿namespace Dagable.Consumer.Models
+﻿namespace Dagable.Consumer.Runner.Models
 {
     public class JobRequest
     {

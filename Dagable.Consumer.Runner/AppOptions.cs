@@ -1,4 +1,4 @@
-﻿namespace Dagable.Consumer
+﻿namespace Dagable.Consumer.Runner
 {
     public class AppOptions
     {

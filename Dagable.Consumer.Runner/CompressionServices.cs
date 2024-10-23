@@ -1,6 +1,5 @@
 ﻿using Dagable.Core;
 using System.IO.Compression;
-using System.Text;
 using System.Text.Json;
 
 namespace Dagable.Consumer
@@ -20,7 +19,7 @@ namespace Dagable.Consumer
         /// </remarks>
         public static byte[] CompressBatch(IEnumerable<ICriticalPathTaskGraph> taskGraphs)
         {
-            byte[] input = JsonSerializer.SerializeToUtf8Bytes(taskGraphs);
+            var input = JsonSerializer.SerializeToUtf8Bytes(taskGraphs);
 
             using (var memoryStream = new MemoryStream())
             {

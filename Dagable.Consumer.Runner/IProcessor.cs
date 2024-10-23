@@ -1,7 +1,7 @@
-﻿using Dagable.Consumer.Models;
+﻿using Dagable.Consumer.Runner.Models;
 using Dagable.Core;
 
-namespace Dagable.Consumer
+namespace Dagable.Consumer.Runner
 {
     internal interface IProcessor
     {

@@ -1,4 +1,4 @@
-﻿using Dagable.Consumer;
+﻿using Dagable.Consumer.Runner;
 using Dagable.Consumer.DataAccess;
 using Dagable.Consumer.DataAccess.Repositories;
 using Dagable.Consumer.Domain.Entities;
@@ -11,7 +11,7 @@ using Microsoft.Extensions.Hosting;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using System.Reflection;
 
-using IHost host = CreateHostBuilder(args).Build();
+using var host = CreateHostBuilder(args).Build();
 using var scope = host.Services.CreateScope();
 
 var services = scope.ServiceProvider;
@@ -20,7 +20,7 @@ services.GetRequiredService<DagableDbContext>().Database.Migrate();
 
 try
 {
-    services.GetRequiredService<Runner>().Run(args);
+    await host.RunAsync();
 }
 catch (Exception e)
 {
@@ -30,28 +30,30 @@ catch (Exception e)
 IHostBuilder CreateHostBuilder(string[] strings)
 {
     return Host.CreateDefaultBuilder()
-          .ConfigureAppConfiguration(app =>
-          {
-              app.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-          })
+        .ConfigureAppConfiguration(app =>
+        {
+            app.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+        })
         .ConfigureServices((context, services) =>
         {
             var migrationsAssembly = typeof(DagableDbContext).GetTypeInfo().Assembly.GetName().Name;
-            string mySqlConnectionStr = context.Configuration.GetConnectionString("DefaultConnection");
+            var mySqlConnectionStr = context.Configuration.GetConnectionString("DefaultConnection");
 
             services
-                 .AddDbContext<DagableDbContext>(opt =>
-                 {
-                     opt.UseMySql(mySqlConnectionStr, ServerVersion.AutoDetect(mySqlConnectionStr), sql => sql.MigrationsAssembly(migrationsAssembly));
-                     opt.UseMySql(ServerVersion.AutoDetect(mySqlConnectionStr), b => b.SchemaBehavior(MySqlSchemaBehavior.Translate, (schema, entity) => $"{schema ?? "dbo"}_{entity}"));
-                 })
+                .AddDbContext<DagableDbContext>(opt =>
+                {
+                    opt.UseMySql(mySqlConnectionStr, ServerVersion.AutoDetect(mySqlConnectionStr),
+                        sql => sql.MigrationsAssembly(migrationsAssembly));
+                    opt.UseMySql(ServerVersion.AutoDetect(mySqlConnectionStr),
+                        b => b.SchemaBehavior(MySqlSchemaBehavior.Translate,
+                            (schema, entity) => $"{schema ?? "dbo"}_{entity}"));
+                })
                 .AddScoped<IProcessor, Processor>()
                 .AddScoped<IRepository<Job>, JobRepository>()
                 .AddScoped<IRepository<Batch>, BatchRepository>()
-                .AddScoped<Runner>()
                 .AddDagableCoreServices()
                 .AddDagableSchedulingServices()
-                .Configure<AppOptions>(context.Configuration);
+                .Configure<AppOptions>(context.Configuration)
+                .AddHostedService<Runner>();
         });
-
 }

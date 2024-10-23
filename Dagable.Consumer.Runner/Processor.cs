@@ -1,7 +1,7 @@
-﻿using Dagable.Consumer.Models;
+﻿using Dagable.Consumer.Runner.Models;
 using Dagable.Core;
 
-namespace Dagable.Consumer
+namespace Dagable.Consumer.Runner
 {
     public class Processor : IProcessor
     {
@@ -44,10 +44,8 @@ namespace Dagable.Consumer
         private static double GenerateRandomValue(double min, double max)
         {
             var random = new Random();
-            double randomDouble = random.NextDouble();
-
-            double randomDecimal = Math.Round(randomDouble, 2);
-
+            var randomDouble = random.NextDouble();
+            var randomDecimal = Math.Round(randomDouble, 2);
             return randomDecimal;
         }
     }
